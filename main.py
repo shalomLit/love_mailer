@@ -39,6 +39,7 @@ def generate_message():
 חלק אותה לפסקאות.
 השתמש בירידת שורה בין כל פסקה.
 אל תכתוב הכל בשורה אחת.
+תנסח את זה בצורת יחיד ולא רבים, לדוגמא - אני אוהב, אני מעריך, ולא אנחנו...
 """
 
     response = client.chat.completions.create(
@@ -52,7 +53,7 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "shdover0@gmail.com"
+    receiver = "sarisat@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
     msg["Subject"] = "💛 הודעה קטנה ממני אלייך"

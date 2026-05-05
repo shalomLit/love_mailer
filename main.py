@@ -32,7 +32,7 @@ def generate_message():
 - אל תציע פעולות או פתרונות
 - אם זה יום רביעי: אפשר לציין בעדינות שזה יום עמוס במיוחד עבורה
 - עד 2–3 שורות
-- סגנון טבעי, אנושי, עדין ולא קיטשי
+- סגנון טבעי, אנושי ,פלרטטני, עדין ולא קיטשי
 - מותר טון אוהב ואינטימי, אבל לא בוטה או מיני מפורש
 - אפשר להביע משיכה בצורה עדינה ומכבדת
 כתוב הודעה בעברית.
@@ -53,7 +53,7 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "sarisat@gmail.com"
+    receiver = "sarisat770@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
     msg["Subject"] = "💛 הודעה קטנה ממני אלייך"

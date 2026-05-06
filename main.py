@@ -1,5 +1,5 @@
 import smtplib
-from datetime import datetime
+import requests
 import os
 from email.mime.text import MIMEText
 
@@ -10,37 +10,80 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+from datetime import datetime
+
+from datetime import datetime
+
+
+def get_weather():
+    api_key = os.getenv("WEATHER_API_KEY")
+
+    url = f"https://api.openweathermap.org/data/2.5/forecast?q=Lod,IL&appid={api_key}&units=metric&lang=he"
+
+    response = requests.get(url)
+    data = response.json()
+
+    temps = []
+    descriptions = []
+
+    today = datetime.now().date()
+
+    for item in data["list"]:
+        dt = datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S")
+        if dt.date() != today:
+            continue
+
+        hour = dt.hour
+        if 11 <= hour <= 17:
+            temps.append(item["main"]["temp_max"])
+            descriptions.append(item["weather"][0]["description"])
+
+    if not temps:
+        return None, None
+
+    avg_temp = round(sum(temps) / len(temps))
+    description = descriptions[0]
+
+    return avg_temp, description
+
 
 def generate_message():
-    day_of_week = datetime.now().strftime("%A")  # e.g. Monday, Wednesday
+    temp, description = get_weather()
 
     prompt = f"""
-כתוב הודעה קצרה, אישית וחמה לאשתי שרי.
+    Write a short good morning message in Hebrew.
 
-רקע עובדתי:
-- יש לנו 5 ילדים: בת בכורה ו־4 בנים
-- אחד הילדים בן 3 עם אתגרים התפתחותיים שמוסיפים עומס יומיומי
-- שרי עובדת קשה מאוד ומנהלת בית עמוס
+    Here is today's weather in Lod, Israel:
+    Temperature: {temp}°
+    Condition: {description}
 
-היום הוא יום {day_of_week}.
+    Instructions:
+    - Use clear structure with 2–3 short paragraphs and line breaks.
+    - Do NOT include units like "C". Temperature should appear only as: 20°.
 
-הנחיות:
-- אל תשתמש בשפה רפואית או אבחנתית
-- במקום לתאר את הילד, התייחס רק באופן כללי ל"אתגרים" או "עומס"
-- אל תיכנס לפרטים על הילדים
-- אל תמציא אירועים
-- אל תציע פעולות או פתרונות
-- אם זה יום רביעי: אפשר לציין בעדינות שזה יום עמוס במיוחד עבורה
-- עד 2–3 שורות
-- סגנון טבעי, אנושי ,פלרטטני, עדין ולא קיטשי
-- מותר טון אוהב ואינטימי, אבל לא בוטה או מיני מפורש
-- אפשר להביע משיכה בצורה עדינה ומכבדת
-כתוב הודעה בעברית.
-חלק אותה לפסקאות.
-השתמש בירידת שורה בין כל פסקה.
-אל תכתוב הכל בשורה אחת.
-תנסח את זה בצורת יחיד ולא רבים, לדוגמא - אני אוהב, אני מעריך, ולא אנחנו...
-"""
+    - The message MUST start exactly with this format (no changes allowed):
+    "בוקר טוב,
+    
+    המזג אוויר היום בלוד הוא - {temp}° עם {description}."
+
+    - First paragraph is ONLY this greeting + weather line.
+
+    - Second paragraph: clothing recommendation for the DAY.
+      Include what to wear during daytime hours.
+
+    - IMPORTANT: also include morning vs evening adjustment:
+      mention that mornings and evenings may be cooler/warmer and suggest appropriate clothing for those times (e.g. light layer / jacket / long sleeves).
+
+    - Third paragraph (only if relevant): rain, wind, or extreme heat ("שרב").
+      If rain is present, explicitly mention it and recommend an umbrella.
+
+    - Tone should be warm but not overly emotional or romantic.
+    - Do not use loving or intimate language.
+    - Keep it concise, natural, and professional.
+    - When suggesting clothing layers, do NOT be overly cautious.
+  Assume a normal preference for cool weather.
+  It is fine to suggest light layering when appropriate, but do not over-emphasize warmth.
+    """
 
     response = client.chat.completions.create(
         model="gpt-5-mini",
@@ -56,7 +99,7 @@ def send_email(message):
     receiver = "sarisat770@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
-    msg["Subject"] = "💛 הודעה קטנה ממני אלייך"
+    msg["Subject"] = "❤בוקר טוב אהובה שלי – תחזית מזג אוויר להיום"
     msg["From"] = sender
     msg["To"] = receiver
 

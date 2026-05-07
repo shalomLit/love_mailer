@@ -91,7 +91,7 @@ def generate_message():
   Assume a normal preference for cool weather.
   It is fine to suggest light layering when appropriate, but do not over-emphasize warmth.
 
-- The message MUST end exactly with:
+- The message MUST end with the exact text below on a new separate line:
 "שיהיה יום טוב מהממת"
     """
 
@@ -106,7 +106,7 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "shdover0@gmail.com"
+    receiver = "sarisat770@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
     msg["Subject"] = "בוקר טוב – תחזית מזג אוויר להיום"

@@ -2,17 +2,13 @@ import smtplib
 import requests
 import os
 from email.mime.text import MIMEText
-
 from dotenv import load_dotenv
 from openai import OpenAI
+from datetime import datetime
 
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-from datetime import datetime
-
-from datetime import datetime
 
 
 def get_weather():
@@ -69,7 +65,18 @@ def generate_message():
     - First paragraph is ONLY this greeting + weather line.
 
     - Second paragraph: clothing recommendation for the DAY.
-      Include what to wear during daytime hours.
+    - Clothing recommendation must explicitly mention:
+    whether children should wear a short-sleeve shirt or a long-sleeve shirt during the day.
+
+    - Be decisive and specific.
+      Do not give vague recommendations like "depending on sensitivity to cold".
+      - Do not include any recommendations about shoes or footwear.
+
+    - Example:
+      "לילדים מומלצת חולצה קצרה."
+      or
+      "לילדים מומלצת חולצה ארוכה דקה בשעות הבוקר."
+          Include what to wear during daytime hours.
 
     - IMPORTANT: also include morning vs evening adjustment:
       mention that mornings and evenings may be cooler/warmer and suggest appropriate clothing for those times (e.g. light layer / jacket / long sleeves).
@@ -83,6 +90,9 @@ def generate_message():
     - When suggesting clothing layers, do NOT be overly cautious.
   Assume a normal preference for cool weather.
   It is fine to suggest light layering when appropriate, but do not over-emphasize warmth.
+
+- The message MUST end exactly with:
+"שיהיה יום טוב מהממת"
     """
 
     response = client.chat.completions.create(
@@ -96,10 +106,10 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "sarisat770@gmail.com"
+    receiver = "shdover0@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
-    msg["Subject"] = "❤בוקר טוב אהובה שלי – תחזית מזג אוויר להיום"
+    msg["Subject"] = "בוקר טוב – תחזית מזג אוויר להיום"
     msg["From"] = sender
     msg["To"] = receiver
 

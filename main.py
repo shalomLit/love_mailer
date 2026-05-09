@@ -1,4 +1,7 @@
+import math
 import smtplib
+from zoneinfo import ZoneInfo
+
 import requests
 import os
 from email.mime.text import MIMEText
@@ -19,25 +22,38 @@ def get_weather():
     response = requests.get(url)
     data = response.json()
 
+    israel_tz = ZoneInfo("Asia/Jerusalem")
+
+    today_israel = datetime.now(israel_tz).date()
+
     temps = []
     descriptions = []
 
-    today = datetime.now().date()
-
     for item in data["list"]:
-        dt = datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S")
-        if dt.date() != today:
+        # הזמן מגיע ב-UTC
+        utc_time = datetime.fromtimestamp(item["dt"], tz=ZoneInfo("UTC"))
+
+        # המרה לשעון ישראל
+        israel_time = utc_time.astimezone(israel_tz)
+
+        # רק של היום בישראל
+        if israel_time.date() != today_israel:
             continue
 
-        hour = dt.hour
-        if 11 <= hour <= 17:
-            temps.append(item["main"]["temp_max"])
+        # רק בין 10:00 ל-17:00
+        if 10 <= israel_time.hour <= 17:
+            temps.append(item["main"]["temp"])
             descriptions.append(item["weather"][0]["description"])
+
+            print(
+                f"שעה: {israel_time.strftime('%H:%M')} | "
+                f"טמפ': {item['main']['temp']}°C"
+            )
 
     if not temps:
         return None, None
 
-    avg_temp = round(sum(temps) / len(temps))
+    avg_temp = math.ceil(sum(temps) / len(temps))
     description = descriptions[0]
 
     return avg_temp, description
@@ -77,6 +93,7 @@ def generate_message():
       or
       "לילדים מומלצת חולצה ארוכה דקה בשעות הבוקר."
           Include what to wear during daytime hours.
+        "don't mention evening recommendation, only for morning and during the day.
 
     - IMPORTANT: also include morning vs evening adjustment:
       mention that mornings and evenings may be cooler/warmer and suggest appropriate clothing for those times (e.g. light layer / jacket / long sleeves).
@@ -92,7 +109,7 @@ def generate_message():
   It is fine to suggest light layering when appropriate, but do not over-emphasize warmth.
 
 - The message MUST end with the exact text below on a new separate line:
-"שיהיה יום טוב מהממת"
+"שיהיה יום טוב"
     """
 
     response = client.chat.completions.create(
@@ -106,7 +123,7 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "sarisat770@gmail.com"
+    receiver = "shdover0@gmail.com"
 
     msg = MIMEText(message, "plain", "utf-8")
     msg["Subject"] = "בוקר טוב – תחזית מזג אוויר להיום"

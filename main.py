@@ -123,16 +123,20 @@ def generate_message():
 def send_email(message):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    receiver = "shdover0@gmail.com"
+
+    receivers = [
+        "itaijacu@gmail.com",
+        "sarisat770@gmail.com"
+    ]
 
     msg = MIMEText(message, "plain", "utf-8")
     msg["Subject"] = "בוקר טוב – תחזית מזג אוויר להיום"
     msg["From"] = sender
-    msg["To"] = receiver
+    msg["To"] = ", ".join(receivers)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(sender, password)
-        server.send_message(msg)
+        server.send_message(msg, from_addr=sender, to_addrs=receivers)
 
 
 if __name__ == "__main__":

@@ -41,22 +41,22 @@ def get_weather():
             continue
 
         # רק בין 10:00 ל-17:00
-        if 10 <= israel_time.hour <= 17:
-            temps.append(item["main"]["temp"])
+        if 9 <= israel_time.hour <= 18:
+            temps.append(item["main"]["temp_max"])
             descriptions.append(item["weather"][0]["description"])
 
             print(
                 f"שעה: {israel_time.strftime('%H:%M')} | "
-                f"טמפ': {item['main']['temp']}°C"
+                f"טמפ': {item['main']['temp_max']}°C"
             )
 
     if not temps:
         return None, None
 
-    avg_temp = math.ceil(sum(temps) / len(temps))
+    max_temp = math.ceil(max(temps))
     description = descriptions[0]
 
-    return avg_temp, description
+    return max_temp, description
 
 
 def generate_message():

@@ -125,8 +125,7 @@ def send_email(message):
     password = os.getenv("EMAIL_PASS")
 
     receivers = [
-        "itaijacu@gmail.com",
-        "sarisat770@gmail.com"
+        "shdover0@gmail.com",
     ]
 
     msg = MIMEText(message, "plain", "utf-8")
